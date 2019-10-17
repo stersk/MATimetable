@@ -11,7 +11,6 @@ import javax.persistence.Table;
 @Entity
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "administrators")
 public class Administrator extends User {
   @Column(name = "user_role")

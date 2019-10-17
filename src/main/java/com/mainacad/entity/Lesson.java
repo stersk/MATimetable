@@ -15,10 +15,11 @@ import java.time.LocalDateTime;
 public class Lesson {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id")
   private Integer id;
 
-  @ManyToOne(targetEntity = Subject.class)
-  private Subject subject;
+  @Column(name = "subject")
+  private Subject name;
 
   @Column(name = "is_lecture")
   private Boolean isLecture;
@@ -33,5 +34,8 @@ public class Lesson {
   private Teacher teacher;
 
   @Column(name = "start_time")
-  private LocalDateTime time;
+  private LocalDateTime startTime;
+
+  @Column(name = "cabinet")
+  private String cabinet;
 }
