@@ -46,32 +46,47 @@ class LessonDAOTest {
         teachers          = new ArrayList<>();
         lessons           = new ArrayList<>();
 
-        Specialization specialization = specializationDAO.saveAndFlush(new Specialization(null, "IT Development"));
-        Group group = groupDAO.saveAndFlush(new Group(null,"Kotlin", specialization));
+        Specialization specialization1 = specializationDAO.saveAndFlush(new Specialization(null, "IT Development"));
+        Specialization specialization2 = specializationDAO.saveAndFlush(new Specialization(null, "IT Development"));
+        Group group = groupDAO.saveAndFlush(new Group(null,"Kotlin", specialization1));
         Student student = new Student(UserRole.STUDENT, group);
         student.setEmail("test@email.com");
         student.setPassword("123456");
         Student storedStudent = studentDAO.saveAndFlush(student);
 
-        Teacher teacher = new Teacher(UserRole.TEACHER, Subject.C_PLUS_PLUS);
-        teacher.setEmail("teacher@email.com");
-        teacher.setPassword("654321");
-        Teacher storedTeacher = teacherDAO.saveAndFlush(teacher);
+        Teacher teacher1 = new Teacher(UserRole.TEACHER, Subject.JAVA);
+        teacher1.setEmail("teacher@email.com");
+        teacher1.setPassword("654321");
+        teacher1 = teacherDAO.saveAndFlush(teacher1);
 
-        Lesson lesson1 = lessonDAO.saveAndFlush(new Lesson(null, Subject.JAVA, true, null, specialization, teacher,
+        Teacher teacher2 = new Teacher(UserRole.TEACHER, Subject.C_PLUS_PLUS);
+        teacher2.setEmail("teacher2@email.com");
+        teacher2.setPassword("123456");
+        teacher2 = teacherDAO.saveAndFlush(teacher2);
+
+        //lecture
+        Lesson lesson1 = lessonDAO.saveAndFlush(new Lesson(null, Subject.JAVA, true, null, specialization1, teacher1,
                 LocalDateTime.of(2019, 10, 1, 19, 30, 0), "1"));
-        Lesson lesson2 = lessonDAO.saveAndFlush(new Lesson(null, Subject.JAVA, true, null, specialization, teacher,
+        //lecture
+        Lesson lesson2 = lessonDAO.saveAndFlush(new Lesson(null, Subject.JAVA, true, null, specialization1, teacher1,
+                LocalDateTime.of(2019, 10, 3, 19, 30, 0), "4"));
+        //lecture
+        Lesson lesson3 = lessonDAO.saveAndFlush(new Lesson(null, Subject.C_PLUS_PLUS, true, null, specialization2, teacher2,
                 LocalDateTime.of(2019, 10, 3, 19, 30, 0), "3"));
-        Lesson lesson3 = lessonDAO.saveAndFlush(new Lesson(null, Subject.JAVA, false, group, null, teacher,
+        //notLecture
+        Lesson lesson4 = lessonDAO.saveAndFlush(new Lesson(null, Subject.JAVA, false, group, null, teacher1,
                 LocalDateTime.of(2019, 10, 24, 19, 30, 0), "24"));
 
-        specializations.add(specialization);
+        specializations.add(specialization1);
+        specializations.add(specialization2);
         groups.add(group);
         students.add(storedStudent);
-        teachers.add(storedTeacher);
+        teachers.add(teacher1);
+        teachers.add(teacher2);
         lessons.add(lesson1);
         lessons.add(lesson2);
         lessons.add(lesson3);
+        lessons.add(lesson4);
     }
 
     @AfterEach
@@ -88,11 +103,34 @@ class LessonDAOTest {
         LocalDateTime from = LocalDateTime.of(2019, 10, 24, 0, 0, 0);
         LocalDateTime to = LocalDateTime.of(2019, 10, 24, 23, 59, 59);
 
-        List<Lesson> testObject = lessonDAO.findNotLectureByStudentAndStartTimeAfterAndStartTimeBefore(students.get(0).getEmail(), from, to);
+        List<Lesson> testObject = lessonDAO.findByStudentAndStartBeforeAndStartTimeAfter(students.get(0).getEmail(), from, to);
 
         assertNotNull(testObject);
         assertEquals(1, testObject.size());
+        assertEquals(lessons.get(3), testObject.get(0));
         assertEquals("24", testObject.get(0).getCabinet());
+
+        from = LocalDateTime.of(2019, 10, 3, 0, 0, 0);
+        to = LocalDateTime.of(2019, 10, 3, 23, 59, 59);
+
+        testObject = lessonDAO.findByStudentAndStartBeforeAndStartTimeAfter(students.get(0).getEmail(), from, to);
+
+        assertNotNull(testObject);
+        assertEquals(1, testObject.size());
+        assertTrue(testObject.get(0).getIsLecture());
+        assertEquals(specializations.get(0), testObject.get(0).getSpecialization());
+        assertEquals("4", testObject.get(0).getCabinet());
+
+        from = LocalDateTime.of(2019, 10, 1, 0, 0, 0);
+
+        testObject = lessonDAO.findByStudentAndStartBeforeAndStartTimeAfter(students.get(0).getEmail(), from, to);
+
+        assertNotNull(testObject);
+        assertEquals(2, testObject.size());
+        assertTrue(testObject.get(0).getIsLecture());
+        assertTrue(testObject.get(1).getIsLecture());
+        assertEquals(specializations.get(0), testObject.get(0).getSpecialization());
+        assertEquals(specializations.get(0), testObject.get(1).getSpecialization());
     }
 
     @Test
@@ -107,15 +145,24 @@ class LessonDAOTest {
     }
 
     @Test
-    void testFindLessonsBySpecialisation(){
+    void testFindLessonsBySpecialisationAndPeriod(){
         LocalDateTime from = LocalDateTime.of(2019, 10, 3, 0, 0, 0);
         LocalDateTime to = LocalDateTime.of(2019, 10, 3, 23, 59, 59);
 
         List<Lesson> testObject = lessonDAO.findBySpecializationAndAndStartTimeAfterAndStartTimeBefore(specializations.get(0), from, to);
 
         assertNotNull(testObject);
+        assertEquals(2, testObject.size());
+        assertEquals("4", testObject.get(0).getCabinet());
+
+        from = LocalDateTime.of(2019, 10, 1, 0, 0, 0);
+        to = LocalDateTime.of(2019, 10, 1, 23, 59, 59);
+
+        testObject = lessonDAO.findBySpecializationAndAndStartTimeAfterAndStartTimeBefore(specializations.get(0), from, to);
+
+        assertNotNull(testObject);
         assertEquals(1, testObject.size());
-        assertEquals("3", testObject.get(0).getCabinet());
+        assertEquals("1", testObject.get(0).getCabinet());
     }
 
     @Test
@@ -143,12 +190,12 @@ class LessonDAOTest {
 
         testObject = lessonDAO.findByAndStartTimeAfterAndStartTimeBefore(from, to);
         assertNotNull(testObject);
-        assertEquals(2, testObject.size());
+        assertEquals(3, testObject.size());
 
         to = LocalDateTime.of(2019, 10, 31, 23, 59, 59);
 
         testObject = lessonDAO.findByAndStartTimeAfterAndStartTimeBefore(from, to);
         assertNotNull(testObject);
-        assertEquals(3, testObject.size());
+        assertEquals(4, testObject.size());
     }
 }

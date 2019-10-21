@@ -21,10 +21,18 @@ public interface LessonDAO extends JpaRepository<Lesson, Integer> {
   List<Lesson> findByAndStartTimeAfterAndStartTimeBefore(LocalDateTime from, LocalDateTime to);
 
   @Query(nativeQuery = true, value =
-          "SELECT l.* FROM lessons l " +
-                  "JOIN students s ON l.group_id=s.group_id " +
-                  "WHERE l.start_time >= :time1 " +
-                  "AND l.start_time <= :time2 " +
-                  "AND s.email = :email")
-  List<Lesson> findNotLectureByStudentAndStartTimeAfterAndStartTimeBefore(@Param("email") String email, @Param("time1")  LocalDateTime time1, @Param("time2")  LocalDateTime time2);
+          "SELECT l1.* FROM lessons l1 " +
+                  "JOIN students s1 ON l1.group_id=s1.group_id " +
+                  "WHERE l1.start_time >= :time1 " +
+                  "AND l1.start_time <= :time2 " +
+                  "AND s1.email = :email " +
+          "UNION " +
+                  "SELECT l2.* FROM lessons l2 " +
+                  "JOIN groups g2 ON l2.specialization_id=g2.specialization_id " +
+                  "JOIN students s2 ON g2.id=s2.group_id " +
+                  "WHERE l2.start_time >= :time1 " +
+                  "AND l2.start_time <= :time2 " +
+                  "AND s2.email = :email"
+  )
+  List<Lesson> findByStudentAndStartBeforeAndStartTimeAfter(@Param("email") String email, @Param("time1")  LocalDateTime time1, @Param("time2")  LocalDateTime time2);
 }
