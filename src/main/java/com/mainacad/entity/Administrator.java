@@ -1,18 +1,19 @@
 package com.mainacad.entity;
 
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Entity
 @Data
 @NoArgsConstructor
 @Table(name = "administrators")
 public class Administrator extends User {
-  @Column(name = "user_role")
+  @JsonInclude()
+  @Transient
   private final UserRole role = UserRole.ADMINISTRATOR;
 }

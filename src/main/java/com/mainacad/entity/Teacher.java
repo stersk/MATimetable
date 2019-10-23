@@ -1,5 +1,6 @@
 package com.mainacad.entity;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,6 +8,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Entity
 @Data
@@ -14,8 +16,8 @@ import javax.persistence.Table;
 @AllArgsConstructor
 @Table(name = "teachers")
 public class Teacher extends User {
-
-  @Column(name = "user_role")
+  @JsonInclude()
+  @Transient
   private UserRole role = UserRole.TEACHER;
 
   @Column(name = "subject")

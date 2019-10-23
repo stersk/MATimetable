@@ -1,13 +1,11 @@
 package com.mainacad.entity;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Data
@@ -15,7 +13,8 @@ import javax.persistence.Table;
 @AllArgsConstructor
 @Table(name = "students")
 public class Student extends User {
-  @Column(name = "user_role")
+  @JsonInclude()
+  @Transient
   private UserRole role = UserRole.STUDENT;
 
   @ManyToOne(targetEntity = Group.class)

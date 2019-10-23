@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface StudentDAO extends JpaRepository<Student, Integer> {
   List<Student> findByGroup(Group group);
+  Student findByEmailEquals(String email);
 }
